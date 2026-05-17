@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Video Player</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html, body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:transparent;
+  touch-action:manipulation;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.player-container{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  border-radius:20px;
+  background:black;
+}
+
+/* VIDEO */
+video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:black;
+  border-radius:20px;
+}
+
+/* TAP AREA */
+.tap-area{
+  position:absolute;
+  top:0;
+  height:100%;
+  z-index:5;
+}
+
+.left-area{
+  left:0;
+  width:35%;
+}
+
+.center-area{
+  left:35%;
+  width:30%;
+}
+
+.right-area{
+  right:0;
+  width:35%;
+}
+
+/* PLAY ICON */
+.play-icon{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  
+  width:90px;
+  height:90px;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  color:white;
+  font-size:42px;
+  font-weight:bold;
+
+  opacity:1;
+  transition:0.25s;
+
+  pointer-events:none;
+  z-index:20;
+}
+
+/* INDICATOR */
+.indicator{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+
+  background:rgba(0,0,0,0.6);
+  color:white;
+
+  padding:14px 24px;
+
+  border-radius:16px;
+
+  font-size:28px;
+  font-weight:bold;
+
+  opacity:0;
+  transition:0.25s;
+
+  z-index:20;
+  pointer-events:none;
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+
+  .play-icon{
+    width:70px;
+    height:70px;
+    font-size:34px;
+  }
+
+  .indicator{
+    font-size:22px;
+    padding:12px 20px;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="player-container">
+
+  <video
+    id="video"
+    playsinline
+    webkit-playsinline
+    preload="auto"
+    controls
+    controlsList="nodownload noplaybackrate"
+  >
+    <source src="video.mp4" type="video/mp4">
+  </video>
+
+  <!-- LEFT -->
+  <div class="tap-area left-area"></div>
+
+  <!-- CENTER -->
+  <div class="tap-area center-area"></div>
+
+  <!-- RIGHT -->
+  <div class="tap-area right-area"></div>
+
+  <!-- PLAY ICON -->
+  <div id="playIcon" class="play-icon">▶</div>
+
+  <!-- INDICATOR -->
+  <div id="indicator" class="indicator">+10s</div>
+
+</div>
+
+<script>
+
+const video = document.getElementById('video');
+
+const leftArea = document.querySelector('.left-area');
+const centerArea = document.querySelector('.center-area');
+const rightArea = document.querySelector('.right-area');
+
+const indicator = document.getElementById('indicator');
+const playIcon = document.getElementById('playIcon');
+
+/* =========================
+   PLAY / PAUSE
+========================= */
+
+function updatePlayIcon(){
+
+  if(video.paused){
+    playIcon.style.opacity = '1';
+  }else{
+    playIcon.style.opacity = '0';
+  }
+
+}
+
+function togglePlay(){
+
+  if(video.paused){
+    video.play();
+  }else{
+    video.pause();
+  }
+
+}
+
+centerArea.addEventListener('click', togglePlay);
+
+video.addEventListener('play', updatePlayIcon);
+video.addEventListener('pause', updatePlayIcon);
+
+/* =========================
+   INDICATOR
+========================= */
+
+function showIndicator(text){
+
+  indicator.innerText = text;
+
+  indicator.style.opacity = '1';
+
+  clearTimeout(window.indicatorTimeout);
+
+  window.indicatorTimeout = setTimeout(()=>{
+
+    indicator.style.opacity = '0';
+
+  },700);
+
+}
+
+/* =========================
+   FORWARD / BACKWARD
+========================= */
+
+function forward(){
+
+  const wasPlaying = !video.paused;
+
+  video.currentTime = Math.min(
+    video.currentTime + 10,
+    video.duration
+  );
+
+  if(wasPlaying){
+    video.play();
+  }
+
+  showIndicator('+10s');
+
+}
+
+function backward(){
+
+  const wasPlaying = !video.paused;
+
+  video.currentTime = Math.max(
+    video.currentTime - 10,
+    0
+  );
+
+  if(wasPlaying){
+    video.play();
+  }
+
+  showIndicator('-10s');
+
+}
+
+/* =========================
+   DOUBLE TAP
+========================= */
+
+rightArea.addEventListener('dblclick', forward);
+
+leftArea.addEventListener('dblclick', backward);
+
+/* =========================
+   INITIAL
+========================= */
+
+updatePlayIcon();
+
+</script>
+
+</body>
+</html>
